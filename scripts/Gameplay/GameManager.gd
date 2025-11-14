@@ -17,13 +17,23 @@ var transitioning := false
 
 # --- Inicialización ---
 func _ready():
-	# 1. Conectarse a la señal de ManejadorNiveles
-	ManejadorNiveles.connect("request_load_level", Callable(self, "_load_level"))
-	# 2. Obtener la referencia al grafo ya generado
+	pass 
+func start_game():
+	print("GameManager: Iniciando el juego...")
 	current_graph = ManejadorNiveles.graph
-	# 3. Instanciar al jugador (lo hacemos solo una vez)
+
+	# --- DEBUGGING 1: ¿Está fallando el JUGADOR? ---
+	print("start_game: Comprobando 'player_scene'...")
+	if player_scene == null:
+		print("¡ERROR FATAL! player_scene es null. Revisa el preload() en GameManager.")
+		return # Detener la función aquí
+	
+	print("start_game: 'player_scene' cargada. Instanciando...")
 	player = player_scene.instantiate()
-	add_child(player) # El jugador es hijo del GameManager, no del nivel
+	add_child(player)
+	print("start_game: Jugador instanciado con éxito.")
+	# --- FIN DEBUGGING 1 ---
+
 	_load_level("level_0")
 # --- Cargar nivel ---
 func _load_level(node_id: String) -> void:
@@ -49,14 +59,20 @@ func _load_level(node_id: String) -> void:
 	 # --- INICIO DEL ACOPLAMIENTO LÓGICA <-> ESCENA ---
 	
 	# 1. Obtenemos las conexiones LÓGICAS del grafo
-	var logical_connections = current_graph.get_neighbors(current_node_id)
+	var logical_connections = ManejadorNiveles.get_connections_for(node_id)
 	
 	# 2. Obtenemos los portales FÍSICOS de la escena
 	var physical_portals = []
+	var number_portals = 0
 	for child in current_level.get_children():
 		if child is Portal: # Buscamos por la class_name 'Portal'
 			physical_portals.append(child)
-
+			number_portals = number_portals +1
+			print("portal agregado: ", number_portals)
+	
+	print("  > Conexiones lógicas encontradas: %d" % logical_connections.size())
+	print("  > Portales físicos encontrados: %d" % physical_portals.size())
+	# --- FIN DE DEBUGGING ---
 	# 3. Asignamos CADA portal físico a una conexión lógica
 	print("GameManager: Configurando portales para %s..." % node_id)
 	for i in range(min(logical_connections.size(), physical_portals.size())):

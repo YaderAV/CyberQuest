@@ -22,7 +22,7 @@ func _ready():
 
 func _on_body_entered(body):
 	# Si no estoy activo o ya estamos transicionando, no hacer nada
-	if not active or get_tree().get_first_node_in_group("GameManager").transitioning:
+	if not active or World.transitioning:
 		return
 
 	# Si el cuerpo que entró es el jugador...

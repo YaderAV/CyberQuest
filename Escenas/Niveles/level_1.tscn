@@ -10,12 +10,13 @@ size = Vector2(261, 20)
 [node name="StaticBody2D" type="StaticBody2D" parent="."]
 
 [node name="MeshInstance2D" type="MeshInstance2D" parent="StaticBody2D"]
-position = Vector2(-1, 21)
+position = Vector2(-1, 149)
 scale = Vector2(262, 19.5)
 mesh = SubResource("QuadMesh_0b4fs")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
-position = Vector2(-0.5, 19)
+position = Vector2(1, 151)
 shape = SubResource("RectangleShape2D_5syx0")
 
 [node name="SpanwPoint" type="Marker2D" parent="."]
+position = Vector2(-0.59, -22.6)
