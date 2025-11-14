@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://cqubs5otocfwr"]
+
+[ext_resource type="Script" uid="uid://dygfy71wtck8y" path="res://scripts/UI/VisualizadorAlgoritmo.gd" id="1_whlmw"]
+
+[node name="VisualizadorAlgoritmo" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_whlmw")
