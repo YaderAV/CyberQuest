@@ -1,0 +1,28 @@
+[gd_scene load_steps=5 format=3 uid="uid://c27h6kb4hpx3w"]
+
+[ext_resource type="Script" uid="uid://dnh12e77ns345" path="res://scripts/Gameplay/MissionController.gd" id="2_toeab"]
+[ext_resource type="Script" uid="uid://dygfy71wtck8y" path="res://scripts/UI/VisualizadorAlgoritmo.gd" id="3_j5gw1"]
+[ext_resource type="Script" uid="uid://qftlro370sqx" path="res://scripts/Gameplay/boot.gd" id="4_pmrx8"]
+[ext_resource type="Script" uid="uid://b3qg66qiufhfy" path="res://scripts/Gameplay/GameManager.gd" id="5_toeab"]
+
+[node name="World" type="Node2D"]
+script = ExtResource("5_toeab")
+
+[node name="MissionController" type="Node" parent="."]
+script = ExtResource("2_toeab")
+
+[node name="UI" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="VisualizadorAlgoritmo" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 13.0
+offset_bottom = 10.0
+script = ExtResource("3_j5gw1")
+metadata/_edit_use_anchors_ = true
+
+[node name="LevelContainer" type="Node" parent="."]
+
+[node name="boot" type="Node" parent="."]
+script = ExtResource("4_pmrx8")
