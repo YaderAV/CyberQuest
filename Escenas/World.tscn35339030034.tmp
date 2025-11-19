@@ -25,76 +25,88 @@ script = ExtResource("3_j5gw1")
 [node name="Panel" type="Panel" parent="UI/VisualizadorAlgoritmo"]
 layout_mode = 1
 anchors_preset = -1
-anchor_right = 1.0
+anchor_right = 1.003
 anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+offset_right = -0.4560547
+offset_bottom = 3.0
+
+[node name="Label" type="Label" parent="UI/VisualizadorAlgoritmo/Panel"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.19800001
+anchor_bottom = 0.15900001
+offset_left = 385.0
+offset_top = 114.0
+offset_right = 196.30998
+offset_bottom = 33.490997
 
 [node name="BFS_BUTTON" type="Button" parent="UI/VisualizadorAlgoritmo/Panel"]
 layout_mode = 0
-offset_left = 1636.0
-offset_top = 699.0
-offset_right = 1781.0
-offset_bottom = 772.0
-text = "BFS"
+offset_left = 278.0
+offset_top = 142.0
+offset_right = 637.0
+offset_bottom = 260.0
 
 [node name="DFS_BUTTON" type="Button" parent="UI/VisualizadorAlgoritmo/Panel"]
 layout_mode = 0
-offset_left = 1637.0
-offset_top = 857.0
-offset_right = 1771.0
-offset_bottom = 930.0
-text = "DFS"
+offset_left = 362.0
+offset_top = 264.0
+offset_right = 652.0
+offset_bottom = 385.0
 
 [node name="Close_button" type="Button" parent="UI/VisualizadorAlgoritmo/Panel"]
 layout_mode = 0
-offset_left = 688.0
-offset_top = 909.0
-offset_right = 1140.0
-offset_bottom = 964.0
+offset_left = 279.0
+offset_top = 469.0
+offset_right = 731.0
+offset_bottom = 524.0
 text = "Cerrar"
 
-[node name="ClueLabel" type="Label" parent="UI/VisualizadorAlgoritmo/Panel"]
-layout_mode = 0
+[node name="TerminalPanel" type="Control" parent="UI/VisualizadorAlgoritmo"]
+anchors_preset = 0
 offset_right = 40.0
-offset_bottom = 23.0
+offset_bottom = 40.0
 
-[node name="MinimapContainer" type="Panel" parent="UI/VisualizadorAlgoritmo"]
+[node name="ChallengeLabel" type="Label" parent="UI/VisualizadorAlgoritmo"]
 layout_mode = 0
-offset_left = 48.0
-offset_top = 23.0
-offset_right = 695.0
-offset_bottom = 372.0
-
-[node name="TerminalPanel" type="VBoxContainer" parent="UI/VisualizadorAlgoritmo"]
-z_as_relative = false
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.15100001
-anchor_bottom = 0.18800001
-offset_left = 1336.0
+offset_left = 534.0
 offset_top = 47.0
-offset_right = 1458.08
-offset_bottom = 169.95999
+offset_right = 574.0
+offset_bottom = 70.0
 
-[node name="ChallengeLabel" type="Label" parent="UI/VisualizadorAlgoritmo/TerminalPanel"]
-layout_mode = 2
-text = "Network Tracer"
+[node name="InputLine" type="LineEdit" parent="UI/VisualizadorAlgoritmo"]
+layout_mode = 0
+offset_left = 131.0
+offset_top = 48.0
+offset_right = 199.5625
+offset_bottom = 79.0
 
-[node name="InputLine" type="LineEdit" parent="UI/VisualizadorAlgoritmo/TerminalPanel"]
-layout_mode = 2
+[node name="SubmitButton" type="Button" parent="UI/VisualizadorAlgoritmo"]
+layout_mode = 0
+offset_left = 73.0
+offset_top = 109.0
+offset_right = 239.0
+offset_bottom = 139.0
 
-[node name="SubmitButton" type="Button" parent="UI/VisualizadorAlgoritmo/TerminalPanel"]
-layout_mode = 2
-text = "enviar código"
-
-[node name="FeedbackLabel" type="Label" parent="UI/VisualizadorAlgoritmo/TerminalPanel"]
-layout_mode = 2
+[node name="FeedbackLabel" type="Label" parent="UI/VisualizadorAlgoritmo"]
+layout_mode = 0
+offset_left = 284.0
+offset_top = 28.0
+offset_right = 372.0
+offset_bottom = 84.0
 
 [node name="LevelContainer" type="Node" parent="."]
 
 [node name="boot" type="Node" parent="."]
 script = ExtResource("4_pmrx8")
+
+[node name="MinimapContainer" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 84.0
+offset_top = 63.0
+offset_right = 124.0
+offset_bottom = 103.0
 
 [connection signal="pressed" from="UI/VisualizadorAlgoritmo/Panel/BFS_BUTTON" to="UI/VisualizadorAlgoritmo" method="_on_bfs_button_pressed"]
 [connection signal="pressed" from="UI/VisualizadorAlgoritmo/Panel/DFS_BUTTON" to="UI/VisualizadorAlgoritmo" method="_on_dfs_button_pressed"]

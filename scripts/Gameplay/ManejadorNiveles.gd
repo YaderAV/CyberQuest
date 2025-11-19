@@ -4,7 +4,7 @@ extends Node
 const GraphGenerator = preload("res://scripts/core/GeneradorGrafo.gd")
 var graph: Graph = null
 
-var map_nodes = ["level_0", "level_1"]
+var map_nodes = ["level_0", "level_1", "level_2","level_3"]
 
 func _ready():
 	randomize() 

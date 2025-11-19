@@ -6,7 +6,7 @@ const SPEED = 400
 const JUMP_VELOCITY = -350.0
 
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
-
+var atacar: bool = false
 enum Mode { EXPLORER, TELEPORTER, REPAIR, FLOW }
 var mode: int = Mode.EXPLORER
 @onready var animationPlayer = $AnimationPlayer
@@ -14,22 +14,30 @@ var mode: int = Mode.EXPLORER
 
 
 func _physics_process(delta):
-	if not is_on_floor():
-		velocity.y += gravity * delta
-	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
-		velocity.y = JUMP_VELOCITY
-		
-	var direction = Input.get_axis("ui_left","ui_right")
-	if direction: 
-		velocity.x = direction * SPEED
+	if not atacar:
+		if not is_on_floor():
+			velocity.y += gravity * delta
+		if Input.is_action_just_pressed("ui_accept") and is_on_floor():
+			velocity.y = JUMP_VELOCITY
+			
+		var direction = Input.get_axis("ui_left","ui_right")
+		if direction: 
+			velocity.x = direction * SPEED
+		else: 
+			velocity.x = move_toward(velocity.x, 0 , SPEED)
+		move_and_slide()
+		animations(direction) 
+		if direction == 1: 
+			sprite.flip_h = false
+		elif direction == -1:
+			sprite.flip_h = true
+		if Input.is_action_just_pressed("Atacar"):
+			atacar= true
 	else: 
-		velocity.x = move_toward(velocity.x, 0 , SPEED)
-	move_and_slide()
-	animations(direction) 
-	if direction == 1: 
-		sprite.flip_h = false
-	elif direction == -1:
-		sprite.flip_h = true
+		move_and_slide()
+		animationPlayer.play("attack")
+		await (animationPlayer.animation_finished)
+		atacar = false	
 func animations(direction):
 	if is_on_floor():
 		if direction == 0:

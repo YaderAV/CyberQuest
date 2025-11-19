@@ -24,7 +24,6 @@ tracks/0/keys = {
 [sub_resource type="Animation" id="Animation_ubeab"]
 resource_name = "attack"
 length = 0.4
-loop_mode = 1
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -195,6 +194,7 @@ vframes = 11
 zoom = Vector2(4.01, 4.01)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(2, 4)
 shape = SubResource("RectangleShape2D_npy4j")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
