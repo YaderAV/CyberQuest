@@ -12,6 +12,7 @@ script = ExtResource("5_toeab")
 script = ExtResource("2_toeab")
 
 [node name="UI" type="CanvasLayer" parent="."]
+visible = false
 
 [node name="VisualizadorAlgoritmo" type="Control" parent="UI"]
 layout_mode = 3
@@ -21,6 +22,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("3_j5gw1")
+metadata/_edit_use_anchors_ = true
 
 [node name="Panel" type="Panel" parent="UI/VisualizadorAlgoritmo"]
 layout_mode = 1

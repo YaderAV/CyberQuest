@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://q0a3gkhfwvp7" path="res://Assets/Player/SPRITE_SHEET.png" id="2_u66gk"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_npy4j"]
-size = Vector2(9.326426, 13.471504)
+size = Vector2(12.663213, 20)
 
 [sub_resource type="Animation" id="Animation_ovd7d"]
 length = 0.001
