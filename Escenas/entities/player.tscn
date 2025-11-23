@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://q0a3gkhfwvp7" path="res://Assets/Player/SPRITE_SHEET.png" id="2_u66gk"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_npy4j"]
-size = Vector2(12.663213, 20)
+size = Vector2(9, 13)
 
 [sub_resource type="Animation" id="Animation_ovd7d"]
 length = 0.001
@@ -194,7 +194,7 @@ vframes = 11
 zoom = Vector2(4.01, 4.01)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(2, 4)
+position = Vector2(1.4999999, 3.5)
 shape = SubResource("RectangleShape2D_npy4j")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
