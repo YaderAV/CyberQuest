@@ -1,7 +1,6 @@
-[gd_scene load_steps=51 format=4 uid="uid://b76lvb8xwiu7b"]
+[gd_scene load_steps=52 format=4 uid="uid://b76lvb8xwiu7b"]
 
 [ext_resource type="PackedScene" uid="uid://b0kfxylhm4xji" path="res://Escenas/Portal.tscn" id="1_t1ha1"]
-[ext_resource type="Script" uid="uid://ccxrupcm6lwdm" path="res://Escenas/Niveles/level_0.gd" id="1_uuhly"]
 [ext_resource type="Texture2D" uid="uid://c4hh5p4ypooof" path="res://Assets/Mapa/[PLUS] Industrial Tileset/PLUS/Industrial Tileset - Plus Pack 32p/3_Far_Background_Tile.png" id="2_80j8w"]
 [ext_resource type="Texture2D" uid="uid://cpqrxpn81f57x" path="res://Assets/Mapa/[PLUS] Industrial Tileset/PLUS/Industrial Tileset - Plus Pack 32p/1_Industrial_Tileset_2.png" id="2_y3x24"]
 [ext_resource type="Texture2D" uid="uid://b8n8g4r61toti" path="res://Assets/Mapa/[PLUS] Industrial Tileset/PLUS/Industrial Tileset - Plus Pack 32p/1_Industrial_Tileset_1B.png" id="3_ctoj5"]
@@ -24,6 +23,13 @@
 [ext_resource type="Texture2D" uid="uid://b8tnihv62t4h7" path="res://Assets/Mapa/[PLUS] Industrial Tileset/PLUS/Industrial Tileset - Plus Pack 32p/1_Industrial_Tileset_3.png" id="18_irhjg"]
 [ext_resource type="Texture2D" uid="uid://ca87vq6rx1ewr" path="res://Assets/Mapa/[PLUS] Industrial Tileset/PLUS/Industrial Tileset - Plus Pack 32p/1_Industrial_Tileset_3B.png" id="19_kwmqi"]
 [ext_resource type="Texture2D" uid="uid://df08snpq1og8g" path="res://Assets/Mapa/[PLUS] Industrial Tileset/PLUS/Industrial Tileset - Plus Pack 32p/4_Industrial_Tileset_1_Foreground_Shadowless_32p.png" id="22_nsxqv"]
+[ext_resource type="Script" uid="uid://yfti4brorf4q" path="res://scripts/Gameplay/respawn.gd" id="25_nsxqv"]
+
+[sub_resource type="GDScript" id="GDScript_uuhly"]
+script/source = "extends Node2D
+
+@onready var spawn_point: Marker2D = $SpawnPoint
+"
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_g2fl5"]
 texture = ExtResource("2_80j8w")
@@ -1617,7 +1623,7 @@ sources/11 = SubResource("TileSetAtlasSource_n7nc7")
 size = Vector2(3842.5, 186)
 
 [node name="Level0" type="Node2D"]
-script = ExtResource("1_uuhly")
+script = SubResource("GDScript_uuhly")
 
 [node name="TilemapLayers" type="Node2D" parent="."]
 
@@ -1646,9 +1652,10 @@ visibility_layer = 8
 position = Vector2(-1035, -123)
 
 [node name="Respawn" type="Area2D" parent="."]
+script = ExtResource("25_nsxqv")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Respawn"]
 position = Vector2(1022.75, 258)
 shape = SubResource("RectangleShape2D_nsxqv")
 
-[connection signal="body_entered" from="Respawn" to="." method="_on_respawn_body_entered"]
+[connection signal="body_entered" from="Respawn" to="Respawn" method="_on_body_entered"]

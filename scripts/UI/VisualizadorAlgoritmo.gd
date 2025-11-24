@@ -217,6 +217,7 @@ func _on_bfs_button_pressed():
 	# Pedir al GameManager que inicie la misión BFS
 	World.start_mission_bfs()
 	
+	
 
 func _on_dfs_button_pressed():
 	print("DEBUG: BOTON DFS PRESIONADO")
