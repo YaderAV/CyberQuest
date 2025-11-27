@@ -8,7 +8,7 @@ class_name GameManager
 @onready var algorithm_visualizer: Node = $UI/VisualizadorAlgoritmo
 @onready var player_scene := preload("res://Escenas/entities/player.tscn")
 @onready var counter_label: Label = $UI/CounterLabel
-
+const FORD_Algoritmo = preload("res://scripts/core/Algoritmos/FordFulkerson.gd")
 # --- Estado global ---
 var current_algorithm_name: String = ""
 var current_level: Node = null
@@ -531,26 +531,49 @@ func _end_minigame_3() -> void:
 #Minijuego 4: Flow Control
 
 func start_mission_flow():
-	print("Iniciando Minijuego 4: Flow Control (Ford-Fulkerson)...")
+	print("Iniciando Minijuego 4: Flow Control (Interactivo)...")
 	
-	# 1. ¡BLOQUEAR INTERACCIÓN! Queremos que el jugador mire la pantalla.
-	self.computer_visible = false
+	self.computer_visible = false # Nos aseguramos de que el menú estándar esté cerrado
 	
 	var source_node = "level_0"
-	# Intentamos buscar un nodo lejano si es posible
-	var possible_sinks = current_graph.nodes().filter(func(n): return n != source_node)
-	var sink_node = possible_sinks.pick_random() if not possible_sinks.is_empty() else "level_1"
+	var sink_node = current_graph.nodes().filter(func(n): return n != source_node).pick_random()
+	if not sink_node: sink_node = "level_1" # Fallback
 	
 	print("Objetivo Flujo: %s -> %s" % [source_node, sink_node])
 
-	# 2. CONECTAR EL VISUALIZADOR
-	# Creamos una función específica para ver la animación de flujo
-	MController.connect("algorithm_steps_ready", Callable(self, "_on_flow_visual_ready"), CONNECT_ONE_SHOT)
+	# 1. Calcular la solución en segundo plano (para saber el objetivo)
+	var ford_inst = FORD_Algoritmo.new()
+	var result = ford_inst.find_max_flow(current_graph, source_node, sink_node)
+	var max_flow_target = result.max_flow
 	
-	# 3. CONECTAR EL FINAL
-	MController.connect("max_flow_found", Callable(self, "_on_max_flow_found"), CONNECT_ONE_SHOT)
+	print("Objetivo calculado por la IA: %.1f" % max_flow_target)
 	
-	MController.start_mission_fort(current_graph, source_node, sink_node)
+	if max_flow_target == 0:
+		# Caso borde: No hay camino. Forzar victoria o reiniciar.
+		_on_flow_game_won()
+		return
+
+	# 2. Iniciar la UI Interactiva
+	# Conectar la señal de victoria del visualizador
+	if not algorithm_visualizer.is_connected("flow_game_completed", Callable(self, "_on_flow_game_won")):
+		algorithm_visualizer.connect("flow_game_completed", Callable(self, "_on_flow_game_won"))
+	
+	algorithm_visualizer.start_flow_minigame(current_graph, source_node, sink_node, max_flow_target)
+
+func _on_flow_game_won():
+	print("¡Minijuego de Flujo completado por el jugador!")
+	
+	# Feedback
+	# algorithm_visualizer.show_success_message("RED ESTABILIZADA")
+	
+	await get_tree().create_timer(2.0).timeout
+	
+	# Limpieza
+	algorithm_visualizer.hide_all_windows()
+	
+	# Transición final
+	print(">>> TRANSICIÓN A COMBATE FINAL <<<")
+	# _load_level("nemesis_lair")
 
 # --- NUEVO HANDLER VISUAL ---
 func _on_flow_visual_ready(steps: Array):

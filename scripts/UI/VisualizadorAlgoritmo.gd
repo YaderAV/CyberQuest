@@ -23,8 +23,10 @@ const NODE_POSITIONS = {
 	"Core_D": Vector2(0.3, 0.7),
 	"Core_E": Vector2(0.7, 0.7),
 }
+const FLOW_EDGE_VISUAL_SCRIPT = preload("res://scripts/UI/flow_edge_visual.gd")
 
 signal solution_submitted(mission_type, player_answer, correct_data)
+signal flow_game_completed()
 
 @onready var terminal_panel: Control = $TerminalPanel # Panel donde se muestra el desafío
 @onready var challenge_label: Label = $TerminalPanel/ChallengeLabel # Texto de la misión (Etapa 1: Recorrido)
@@ -40,6 +42,18 @@ signal solution_submitted(mission_type, player_answer, correct_data)
 @onready var map_toggle_btn = $Panel/Map_button
 @onready var term_toggle_btn = $Panel/Terminal_button
 
+@onready var flow_game_container: Control = $FlowGameContainer 
+@onready var flow_target_label: Label =$FlowGameContainer/TargetLabel  # Label hijo para mostrar "Objetivo: 15"
+
+# --- Variables de Estado del Juego de Flujo ---
+var flow_graph_data := {} # { "u-v": current_flow }
+var node_balances := {}   # { "node_id": current_stored_flow }
+var target_max_flow: float = 0.0
+var current_sink_flow: float = 0.0
+var flow_source_node: String = ""
+var flow_sink_node: String = ""
+
+
 var current_challenge_type: String = ""
 var current_correct_data: Dictionary = {}
 
@@ -52,6 +66,193 @@ func update_player_position_on_map(current_node_id: String):
 			# Es el actual si su nombre coincide con el ID del nodo donde está el jugador
 			var is_current = (child.name == current_node_id)
 			child.set_as_current(is_current)
+
+
+func start_flow_minigame(graph: Graph, source: String, sink: String, target_val: float):
+	# 1. Configuración Inicial
+	flow_source_node = source
+	flow_sink_node = sink
+	target_max_flow = target_val
+	
+	flow_graph_data.clear()
+	node_balances.clear()
+	
+	# Inicializar balances
+	for node in graph.nodes():
+		node_balances[node] = 0.0
+	node_balances[source] = 9999.0 # La fuente tiene infinito (o suficiente)
+	
+	# 2. Preparar UI
+	hide_all_windows()
+	self.show()
+	flow_game_container.show()
+	flow_game_container.move_to_front()
+	
+	flow_target_label.text = "OBJETIVO DE FLUJO: 0 / %d" % int(target_val)
+	flow_target_label.modulate = Color.WHITE
+	
+	# 3. Generar el Grafo Interactivo
+	_generate_interactive_flow_graph(graph)
+
+func _generate_interactive_flow_graph(graph: Graph):
+	# Limpiar contenedor
+	for child in flow_game_container.get_children():
+		if child.name == "TargetLabel": continue # No borrar el label de objetivo
+		child.queue_free()
+		
+	var container_size = flow_game_container.size
+	var node_visuals = {}
+	
+	# A. Generar Nodos (Visuales simples)
+	for node_id in graph.nodes():
+		var node_visual = NODE_VISUAL.instantiate()
+		node_visual.name = node_id
+		# Usar posiciones relativas expandidas a pantalla completa
+		var relative_pos = NODE_POSITIONS.get(node_id, Vector2(0.5, 0.5))
+		node_visual.position = Vector2(relative_pos.x * container_size.x, relative_pos.y * container_size.y)
+		
+		# Marcar Fuente y Sumidero
+		if node_id == flow_source_node: node_visual.modulate = Color.GREEN
+		elif node_id == flow_sink_node: node_visual.modulate = Color.RED
+		
+		# Poner texto
+		if node_visual.has_method("set_node_info"):
+			node_visual.set_node_info(node_id, graph.get_node_letter(node_id))
+			
+		flow_game_container.add_child(node_visual)
+		node_visuals[node_id] = node_visual
+
+	# B. Generar Aristas Interactivas
+	var processed_edges = {}
+	for u in graph.nodes():
+		for edge in graph.get_neighbors(u):
+			var v = edge.to
+			var capacity = edge.get("capacity", 10.0)
+			
+			# Evitar duplicados visuales (dibujamos solo la dirección 'positiva' o manejamos bidireccionalidad)
+			# Para Flujo Máximo jugable, solemos simplificar a unidireccional visualmente
+			# o permitimos control en ambas direcciones. 
+			# Asumiremos grafo dirigido para simplificar el puzzle: Solo dibujamos si capacity > 0
+			if capacity <= 0: continue
+			
+			var edge_id = "%s->%s" % [u, v]
+			flow_graph_data[edge_id] = 0.0 # Flujo inicial 0
+			
+			# Instanciar el visualizador de arista interactiva
+			var flow_edge = Line2D.new()
+			flow_edge.set_script(FLOW_EDGE_VISUAL_SCRIPT)
+			flow_edge.name = edge_id
+			
+			var start = node_visuals[u].position + (node_visuals[u].size / 2.0)
+			var end = node_visuals[v].position + (node_visuals[v].size / 2.0)
+			
+			flow_game_container.add_child(flow_edge)
+			# Llamar setup después de añadir al árbol
+			flow_edge.setup(u, v, capacity, start, end)
+			
+			# Conectar señal de cambio
+			flow_edge.flow_changed.connect(_on_player_flow_change)
+
+func _on_player_flow_change(u: String, v: String, new_flow: float):
+	# Lógica de Validación del Juego
+	var edge_id = "%s->%s" % [u, v]
+	var edge_visual = flow_game_container.get_node(edge_id)
+	var old_flow = flow_graph_data[edge_id]
+	var capacity = edge_visual.capacity
+	
+	# 1. Validar límites básicos (0 a Capacidad)
+	if new_flow < 0 or new_flow > capacity:
+		return # Movimiento inválido
+		
+	# 2. Validar Disponibilidad (Flow Conservation)
+	# El nodo 'u' debe tener suficiente flujo entrante para mandar 'new_flow'.
+	# Balance = (Lo que entra) - (Lo que sale)
+	
+	# Calcular cuánto está saliendo actualmente de 'u' (excluyendo esta arista)
+	var current_out_flow = 0.0
+	for other_edge_id in flow_graph_data:
+		if other_edge_id.begins_with(u + "->") and other_edge_id != edge_id:
+			current_out_flow += flow_graph_data[other_edge_id]
+			
+	# Calcular cuánto entra a 'u'
+	var current_in_flow = 0.0
+	if u == flow_source_node:
+		current_in_flow = 9999.0 # Infinito
+	else:
+		for other_edge_id in flow_graph_data:
+			if other_edge_id.ends_with("->" + u):
+				current_in_flow += flow_graph_data[other_edge_id]
+	
+	# Verificar si podemos soportar el nuevo flujo
+	if (current_out_flow + new_flow) > current_in_flow:
+		print("Visualizador: No hay suficiente flujo en %s para enviar más." % u)
+		# Feedback visual: Parpadeo rojo en el nodo u?
+		return 
+
+	# 3. Aplicar Cambio
+	flow_graph_data[edge_id] = new_flow
+	edge_visual.update_flow_value(new_flow)
+	
+	# 4. Efecto Cascada (Opcional):
+	# Si reducimos el flujo hacia 'v', y 'v' estaba enviando ese flujo adelante,
+	# deberíamos reducir el flujo saliente de 'v' también para mantener la coherencia?
+	# Para este minijuego, dejaremos que el jugador lo corrija manualmente (se mostrará error si intenta subir).
+	# O podemos forzar la corrección hacia abajo:
+	_propagate_flow_reduction(v)
+	
+	# 5. Verificar Victoria
+	_check_flow_victory()
+
+func _propagate_flow_reduction(node_id: String):
+	# Si un nodo está enviando más de lo que recibe, reducir sus salidas automáticamente
+	if node_id == flow_source_node or node_id == flow_sink_node: return
+	
+	var in_flow = 0.0
+	for eid in flow_graph_data:
+		if eid.ends_with("->" + node_id): in_flow += flow_graph_data[eid]
+		
+	var out_flow = 0.0
+	var out_edges = []
+	for eid in flow_graph_data:
+		if eid.begins_with(node_id + "->"):
+			out_flow += flow_graph_data[eid]
+			out_edges.append(eid)
+			
+	if out_flow > in_flow:
+		# Reducir proporcionalmente o simplemente cortar el último
+		# Vamos a cortar agresivamente para simplificar
+		var diff = out_flow - in_flow
+		for eid in out_edges:
+			var current = flow_graph_data[eid]
+			var to_remove = min(current, diff)
+			flow_graph_data[eid] -= to_remove
+			diff -= to_remove
+			
+			# Actualizar visual
+			var visual = flow_game_container.get_node(eid)
+			visual.update_flow_value(flow_graph_data[eid])
+			
+			# Recursividad hacia abajo
+			var next_node = eid.split("->")[1]
+			_propagate_flow_reduction(next_node)
+			
+			if diff <= 0: break
+
+func _check_flow_victory():
+	# Calcular flujo total llegando al sumidero
+	var total_sink_flow = 0.0
+	for eid in flow_graph_data:
+		if eid.ends_with("->" + flow_sink_node):
+			total_sink_flow += flow_graph_data[eid]
+			
+	flow_target_label.text = "OBJETIVO DE FLUJO: %d / %d" % [int(total_sink_flow), int(target_max_flow)]
+	
+	if total_sink_flow >= target_max_flow:
+		flow_target_label.modulate = Color.GREEN
+		print("Visualizador: ¡Flujo Máximo Alcanzado!")
+		
+		await get_tree().create_timer(1.0).timeout
+		emit_signal("flow_game_completed")
 
 func prompt_for_solution(mission_type: String, correct_data: Dictionary) -> void:
 	# 1. Almacena ambos argumentos
@@ -135,6 +336,8 @@ func _ready():
 	# Escondemos el UI del visualizador de algoritmos 
 	if is_instance_valid(terminal_panel):
 		terminal_panel.hide()
+	if flow_game_container: flow_game_container.hide()
+	
 	
 	hide()
 
@@ -142,6 +345,7 @@ func hide_all_windows():
 	if is_instance_valid(selection_panel): selection_panel.hide()
 	if is_instance_valid(terminal_panel): terminal_panel.hide()
 	if is_instance_valid(minimap_container): minimap_container.hide()
+	if is_instance_valid(flow_game_container): flow_game_container.hide()
 
 # Abre solo el menú principal (llamado por la tecla E)
 func show_main_menu():
