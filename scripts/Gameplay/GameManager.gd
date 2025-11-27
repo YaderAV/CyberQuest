@@ -7,7 +7,7 @@ class_name GameManager
 @onready var level_container: Node = $LevelContainer
 @onready var algorithm_visualizer: Node = $UI/VisualizadorAlgoritmo
 @onready var player_scene := preload("res://Escenas/entities/player.tscn")
-
+@onready var counter_label: Label = $UI/CounterLabel
 
 # --- Estado global ---
 var current_algorithm_name: String = ""
@@ -114,15 +114,20 @@ func _load_level(node_id: String) -> void:
 		
 		var target_node = connection_data["to"]
 		# Crear ID de la arista para verificar estado
+		var dest_letter = current_graph.get_node_letter(target_node)
+		
 		var id_parts = [node_id, target_node]
 		id_parts.sort()
 		var edge_id = "%s-%s" % [id_parts[0], id_parts[1]]
 		# Asignamos el mapa a este portal
 		portal_node.current_node = node_id
-		
+		portal_node.destination_letter = dest_letter # <--- ASIGNAR LA LETRA
 		# ¡Configuramos el destino del portal!
 		portal_node.target_node = target_node
 		portal_node.active = true
+		
+		if portal_node.has_method("_update_visuals"):
+			portal_node._update_visuals()
 		
 		if is_reconstruction_mode:
 			# Si estamos en modo reconstrucción, el estado depende de si ya lo arreglamos.
@@ -163,7 +168,34 @@ func _load_level(node_id: String) -> void:
 	transitioning = false
 	print("Nivel cargado:", node_id)
 	# --- VERIFICACIÓN DE MISIÓN 2 ---
+	if is_instance_valid(algorithm_visualizer):
+		algorithm_visualizer.update_player_position_on_map(current_node_id)
+	
 	_check_dijkstra_arrival()
+
+func _update_reconstruction_counter():
+	if not is_instance_valid(counter_label): return
+	
+	# Calcular cuántos faltan
+	var total = reconstruction_target.size()
+	var fixed_count = 0
+	
+	# Contar cuántos están en 'true' en el diccionario
+	for edge_id in reconstructed_edges:
+		if reconstructed_edges[edge_id] == true:
+			fixed_count += 1
+			
+	var remaining = total - fixed_count
+	
+	# Actualizar texto y color
+	counter_label.text = "ENERGÍA INESTABLE - PORTALES RESTANTES: %d" % remaining
+	
+	if remaining == 0:
+		counter_label.modulate = Color.GREEN
+	else:
+		counter_label.modulate = Color.YELLOW
+		
+	counter_label.show()
 
 func on_enemy_killed():
 	print("¡Enemigo derrotado en %s!" % current_node_id)
@@ -434,6 +466,8 @@ func _on_mst_found(mst_edges: Array)->void:
 	# 4. Cambiar la dinámica de juego
 	World.is_reconstruction_mode = true # Estado global para el ingeniero
 	
+	_update_reconstruction_counter()
+	
 	# 5. Informar al jugador (ej. mostrar un mensaje HUD o un pop-up)
 	# World.ui_manager.display_message("¡Alerta! Modo Ingeniero activado. Reconstruye los portales usando el MST.")
 	
@@ -459,6 +493,9 @@ func rebuild_edge(node_a: String, node_b: String) -> bool:
 		return true
 	# 3. Reconstrucción exitosa
 	reconstructed_edges[edge_id] = true
+	
+	_update_reconstruction_counter()
+	
 	print("¡Arista %s reconstruida con éxito! Peso: %s" % [edge_id, "Desconocido (Buscar en MST)"])
 	
 	# Opcional: Notificar al portal que ahora debe estar funcional
@@ -484,6 +521,9 @@ func _end_minigame_3() -> void:
 	
 	# Opcional: Limpiar el minimapa del visualizador
 	# algorithm_visualizer.hide()
+	
+	if is_instance_valid(counter_label):
+		counter_label.hide()
 	
 	# Llamar al Minijuego 4: Flow Control (Ford-Fulkerson)
 	start_mission_flow()

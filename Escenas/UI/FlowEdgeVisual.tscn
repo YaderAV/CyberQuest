@@ -1,0 +1,26 @@
+[gd_scene load_steps=2 format=3 uid="uid://h284ww1m5ini"]
+
+[ext_resource type="Script" uid="uid://ca0x1kkg0a03q" path="res://Escenas/UI/flow_edge_visual.gd" id="1_hs5hq"]
+
+[node name="FlowEdgeVisual" type="Line2D"]
+script = ExtResource("1_hs5hq")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1920.0
+offset_bottom = 1075.0
+
+[node name="+" type="Button" parent="Control"]
+layout_mode = 0
+offset_left = 452.0
+offset_top = 191.0
+offset_right = 1373.0
+offset_bottom = 500.0
+
+[node name="-" type="Button" parent="Control"]
+layout_mode = 0
+offset_left = 458.0
+offset_top = 564.0
+offset_right = 1395.0
+offset_bottom = 817.0

@@ -1,7 +1,8 @@
-[gd_scene load_steps=7 format=3 uid="uid://b0kfxylhm4xji"]
+[gd_scene load_steps=8 format=3 uid="uid://b0kfxylhm4xji"]
 
 [ext_resource type="Script" uid="uid://cy46camydcbf8" path="res://scripts/Gameplay/Portal.gd" id="1_j0rad"]
 [ext_resource type="Texture2D" uid="uid://b0ynaxr2lmupv" path="res://Assets/Mapa/Portal.png" id="2_c7u1r"]
+[ext_resource type="Theme" uid="uid://csgsn0ap211pm" path="res://UI/subtitulos.tres" id="3_sesui"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_c7u1r"]
 radius = 8.0
@@ -109,5 +110,14 @@ hframes = 7
 libraries = {
 &"": SubResource("AnimationLibrary_5jdst")
 }
+
+[node name="InfoLabel" type="Label" parent="."]
+offset_left = -34.0
+offset_top = -44.0
+offset_right = 48.0
+offset_bottom = -13.0
+theme = ExtResource("3_sesui")
+horizontal_alignment = 1
+vertical_alignment = 2
 
 [connection signal="area_entered" from="." to="." method="_on_area_entered"]

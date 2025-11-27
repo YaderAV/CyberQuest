@@ -182,7 +182,7 @@ _data = {
 }
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_tm4b3"]
-radius = 7.071068
+radius = 17.0
 
 [node name="Player" type="CharacterBody2D"]
 slide_on_ceiling = false
@@ -209,7 +209,7 @@ libraries = {
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="WeaponArea"]
 light_mask = 4
-position = Vector2(9, 3)
+position = Vector2(1, 2)
 shape = SubResource("CircleShape2D_tm4b3")
 disabled = true
 

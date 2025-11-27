@@ -1,4 +1,4 @@
-[gd_scene load_steps=63 format=4 uid="uid://w0h3eraguc56"]
+[gd_scene load_steps=64 format=4 uid="uid://w0h3eraguc56"]
 
 [ext_resource type="Texture2D" uid="uid://c4hh5p4ypooof" path="res://Assets/Mapa/[PLUS] Industrial Tileset/PLUS/Industrial Tileset - Plus Pack 32p/3_Far_Background_Tile.png" id="1_l6fev"]
 [ext_resource type="PackedScene" uid="uid://b0kfxylhm4xji" path="res://Escenas/Portal.tscn" id="1_owqdj"]
@@ -30,6 +30,7 @@
 [ext_resource type="Texture2D" uid="uid://df08snpq1og8g" path="res://Assets/Mapa/[PLUS] Industrial Tileset/PLUS/Industrial Tileset - Plus Pack 32p/4_Industrial_Tileset_1_Foreground_Shadowless_32p.png" id="22_gfygj"]
 [ext_resource type="Texture2D" uid="uid://baqwrxxo1jgyq" path="res://Assets/Mapa/[PLUS] Industrial Tileset/PLUS/Animated Dieselpunk orange tiles 32p/Industrial_Tileset_B_Tile-13_Anim/Industrial_Tileset_B_Tile-13_Anim_spritesheet.png" id="24_h3tn4"]
 [ext_resource type="Script" uid="uid://yfti4brorf4q" path="res://scripts/Gameplay/respawn.gd" id="30_daf43"]
+[ext_resource type="PackedScene" uid="uid://lidkc3qjral5" path="res://Escenas/entities/Enemie.tscn" id="31_nhhff"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tmhwa"]
 texture = ExtResource("1_l6fev")
@@ -1851,5 +1852,8 @@ script = ExtResource("30_daf43")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Respawn"]
 position = Vector2(1029, 438)
 shape = SubResource("RectangleShape2D_nhhff")
+
+[node name="Enemy" parent="." instance=ExtResource("31_nhhff")]
+position = Vector2(-195, -95)
 
 [connection signal="body_entered" from="Respawn" to="Respawn" method="_on_body_entered"]

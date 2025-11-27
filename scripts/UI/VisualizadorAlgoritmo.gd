@@ -43,7 +43,15 @@ signal solution_submitted(mission_type, player_answer, correct_data)
 var current_challenge_type: String = ""
 var current_correct_data: Dictionary = {}
 
-
+func update_player_position_on_map(current_node_id: String):
+	if not is_instance_valid(minimap_container): return
+	
+	# Recorrer todos los hijos (Nodos visuales)
+	for child in minimap_container.get_children():
+		if child.has_method("set_as_current"):
+			# Es el actual si su nombre coincide con el ID del nodo donde está el jugador
+			var is_current = (child.name == current_node_id)
+			child.set_as_current(is_current)
 
 func prompt_for_solution(mission_type: String, correct_data: Dictionary) -> void:
 	# 1. Almacena ambos argumentos
@@ -403,7 +411,7 @@ func generate_and_show_graph(graph: Graph, edges_to_highlight: Array = []) -> vo
 		
 		# (Si usabas la lógica anterior de buscar "Label" manualmente, bórrala,
 		#  es mejor usar la función del paso 1).
-	
+	update_player_position_on_map(World.current_node_id)
 	update_nodes_visual_state(World.current_node_id, World.unlocked_nodes)
 	
 	# 3. Generar Aristas (Portales)
