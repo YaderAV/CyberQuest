@@ -1,3 +1,43 @@
-[gd_scene format=3 uid="uid://i42k42mf5oxg"]
+[gd_scene load_steps=5 format=3 uid="uid://i42k42mf5oxg"]
+
+[ext_resource type="Texture2D" uid="uid://qpjm87eumitt" path="res://Assets/menu.jpeg" id="1_5dat3"]
+[ext_resource type="Script" uid="uid://in5b8p5suele" path="res://Escenas/UI/menú.gd" id="1_8qgdw"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8qgdw"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_weojh"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
 
 [node name="Menú" type="Node2D"]
+script = ExtResource("1_8qgdw")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1923.0
+offset_bottom = 1079.0
+
+[node name="TextureRect" type="TextureRect" parent="Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -2.0
+offset_top = 1.0
+offset_right = -2.0
+offset_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_5dat3")
+
+[node name="Button" type="Button" parent="Control"]
+layout_mode = 0
+offset_left = 837.0
+offset_top = 783.0
+offset_right = 1207.0
+offset_bottom = 845.0
+theme_override_styles/normal = SubResource("StyleBoxFlat_8qgdw")
+theme_override_styles/hover = SubResource("StyleBoxFlat_weojh")
+
+[connection signal="pressed" from="Control/Button" to="." method="_on_button_pressed"]
