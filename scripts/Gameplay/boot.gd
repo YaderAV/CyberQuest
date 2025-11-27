@@ -8,7 +8,8 @@ func _ready():
 	
 	# 2. AHORA es seguro llamar a start_game(),
 	#    porque sus variables @onready ya están cargadas.
-	World.start_game()
+	get_tree().change_scene_to_file("res://Escenas/UI/Menú.tscn")
+	#World.start_game()
 	
 	# 3. Esta escena 'boot' ya cumplió su misión. La destruimos.
 	queue_free()
