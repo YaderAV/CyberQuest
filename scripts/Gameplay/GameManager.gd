@@ -10,6 +10,7 @@ class_name GameManager
 
 
 # --- Estado global ---
+var current_algorithm_name: String = ""
 var current_level: Node = null
 var player: Node = null
 var current_node_id: String = ""
@@ -25,6 +26,7 @@ var MAX_FINAL_STAGES = 4 # BFS, Dijkstra, Prim, Flow
 var current_mission_index: int = 0
 var dijkstra_target_node: String = ""
 var reconstruction_target: Array = []
+var unlocked_nodes: Dictionary = {} 
 const MISSION_FLOW = [
 	"NetworkTracer", # Minijuego 1 (BFS/DFS)
 	"SafeRoute",     # Minijuego 2 (Dijkstra)
@@ -32,12 +34,18 @@ const MISSION_FLOW = [
 	"FlowControl",   # Minijuego 4 (Ford-Fulkerson)
 	"FinalCombat"    # Minijuego 5 (Boss Final + Challenge)
 ]
+
+
 # --- Inicialización ---
 func _ready():
 	pass 
+	
+	
+	
 func start_game():
 	print("GameManager: Iniciando el juego...")
 	current_graph = ManejadorNiveles.graph
+	unlocked_nodes.clear()
 	
 	collected_letters_string = "" # Reiniciar al empezar juego nuevo
 	algorithm_visualizer.update_collected_clues(collected_letters_string)
@@ -53,7 +61,7 @@ func start_game():
 	add_child(player)
 	print("start_game: Jugador instanciado con éxito.")
 	# --- FIN DEBUGGING 1 ---
-
+	
 	_load_level("level_0")
 # --- Cargar nivel ---
 func _load_level(node_id: String) -> void:
@@ -78,6 +86,9 @@ func _load_level(node_id: String) -> void:
 
 	 # --- INICIO DEL ACOPLAMIENTO LÓGICA <-> ESCENA ---
 	
+	if is_instance_valid(algorithm_visualizer):
+			algorithm_visualizer.update_nodes_visual_state(current_node_id, unlocked_nodes)
+	
 	# 1. Obtenemos las conexiones LÓGICAS del grafo
 	var logical_connections = ManejadorNiveles.get_connections_for(node_id)
 	
@@ -89,6 +100,8 @@ func _load_level(node_id: String) -> void:
 			physical_portals.append(child)
 			number_portals = number_portals +1
 			print("portal agregado: ", number_portals)
+	
+	
 	
 	print("  > Conexiones lógicas encontradas: %d" % logical_connections.size())
 	print("  > Portales físicos encontrados: %d" % physical_portals.size())
@@ -151,6 +164,19 @@ func _load_level(node_id: String) -> void:
 	print("Nivel cargado:", node_id)
 	# --- VERIFICACIÓN DE MISIÓN 2 ---
 	_check_dijkstra_arrival()
+
+func on_enemy_killed():
+	print("¡Enemigo derrotado en %s!" % current_node_id)
+	
+	# 1. Registrar que este nodo ya fue "limpiado"
+	unlocked_nodes[current_node_id] = true
+	
+	# 2. Obtener la letra (solo para feedback en consola o HUD)
+	var letter = current_graph.get_node_letter(current_node_id)
+	print("Pista obtenida: %s" % letter)
+	
+	# 3. Actualizar el minimapa en tiempo real (si está abierto o para la próxima vez)
+	# (Opcional: Mostrar un mensaje flotante en el juego)
 
 func _check_dijkstra_arrival():
 	if MISSION_FLOW[current_mission_index] == "SafeRoute" and dijkstra_target_node != "":
@@ -262,7 +288,7 @@ func _on_request_load_level(node_id: String) -> void:
 func start_mission_bfs():
 	print("Iniciando misión BFS...")
 	self.computer_visible = false
-
+	current_algorithm_name = "BFS" # <-- GUARDAMOS EL NOMBRE
 	
 	MController.connect("network_tracer_key_ready", Callable(self, "_on_network_key_ready"), CONNECT_ONE_SHOT)
 	MController.start_mission_bfs(current_graph, current_node_id)
@@ -270,19 +296,19 @@ func start_mission_bfs():
 func start_mission_dfs():
 	print("Iniciando misión DFS...")
 	self.computer_visible = false
+	current_algorithm_name = "DFS" # <-- GUARDAMOS EL NOMBRE
+	
 	MController.connect("network_tracer_key_ready", Callable(self, "_on_network_key_ready"), CONNECT_ONE_SHOT)
 	MController.start_mission_dfs(current_graph, current_node_id)
 	
 	
 func _on_network_key_ready(result: Dictionary):
 	
-	# 7. ¡ELIMINA EL CÓDIGO BASURA QUE TENÍAS PEGADO AQUÍ DENTRO!
-	
 	# 1. Extraer los datos (pasos y clave)
 	var steps = result.get("steps", [])
 	var key = result.get("key", "ERROR_NO_KEY")
 	
-	print(key)
+	print("Clave %s generada: %s" % [current_algorithm_name, key]) 
 	
 	if steps.is_empty() or key == "ERROR_NO_KEY":
 		push_warning("Resultado de la misión inválido.")

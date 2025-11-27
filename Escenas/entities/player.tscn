@@ -1,6 +1,6 @@
-[gd_scene load_steps=15 format=3 uid="uid://bue4lvq1a5owf"]
+[gd_scene load_steps=16 format=3 uid="uid://bue4lvq1a5owf"]
 
-[ext_resource type="Script" uid="uid://enc2sydd7l5v" path="res://scripts/Gameplay/Player.gd" id="1_nisyw"]
+[ext_resource type="Script" uid="uid://enc2sydd7l5v" path="res://scripts/Entities/Player.gd" id="1_nisyw"]
 [ext_resource type="Texture2D" uid="uid://q0a3gkhfwvp7" path="res://Assets/Player/SPRITE_SHEET.png" id="2_u66gk"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_npy4j"]
@@ -181,6 +181,9 @@ _data = {
 &"superAttack": SubResource("Animation_7rw6o")
 }
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_tm4b3"]
+radius = 7.071068
+
 [node name="Player" type="CharacterBody2D"]
 slide_on_ceiling = false
 script = ExtResource("1_nisyw")
@@ -202,4 +205,13 @@ libraries = {
 &"": SubResource("AnimationLibrary_l67ac")
 }
 
+[node name="WeaponArea" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WeaponArea"]
+light_mask = 4
+position = Vector2(9, 3)
+shape = SubResource("CircleShape2D_tm4b3")
+disabled = true
+
 [connection signal="animation_finished" from="AnimationPlayer" to="." method="_on_idle_animation_finished"]
+[connection signal="body_entered" from="WeaponArea" to="." method="_on_weapon_area_body_entered"]

@@ -39,6 +39,7 @@ func start_mission_bfs(graph_inst: Graph, start_node: String):
 func start_mission_dfs(graph_inst: Graph, start_node:String):
 	graph_ref = graph_inst
 	var result =DFS_Algoritmo.run(graph_ref,start_node)
+
 	emit_signal("algorithm_steps_ready", result["steps"])
 	emit_signal("network_tracer_key_ready", result)
 

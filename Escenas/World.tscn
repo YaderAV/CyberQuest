@@ -47,25 +47,35 @@ offset_right = 1771.0
 offset_bottom = 930.0
 text = "DFS"
 
-[node name="Close_button" type="Button" parent="UI/VisualizadorAlgoritmo/Panel"]
-layout_mode = 0
-offset_left = 688.0
-offset_top = 909.0
-offset_right = 1140.0
-offset_bottom = 964.0
-text = "Cerrar"
-
 [node name="ClueLabel" type="Label" parent="UI/VisualizadorAlgoritmo/Panel"]
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 23.0
 
-[node name="MinimapContainer" type="Panel" parent="UI/VisualizadorAlgoritmo"]
+[node name="Map_button" type="Button" parent="UI/VisualizadorAlgoritmo/Panel"]
 layout_mode = 0
-offset_left = 48.0
-offset_top = 23.0
-offset_right = 695.0
-offset_bottom = 372.0
+offset_left = 1344.0
+offset_top = 118.0
+offset_right = 1739.0
+offset_bottom = 189.0
+text = "Mapa"
+
+[node name="Terminal_button" type="Button" parent="UI/VisualizadorAlgoritmo/Panel"]
+layout_mode = 0
+offset_left = 1304.0
+offset_top = 284.0
+offset_right = 1805.0
+offset_bottom = 365.0
+text = "Terminal"
+
+[node name="MinimapContainer" type="Panel" parent="UI/VisualizadorAlgoritmo"]
+visibility_layer = 512
+z_index = 20
+layout_mode = 0
+offset_left = 86.0
+offset_top = 496.0
+offset_right = 733.0
+offset_bottom = 996.0
 
 [node name="TerminalPanel" type="VBoxContainer" parent="UI/VisualizadorAlgoritmo"]
 z_as_relative = false
@@ -73,10 +83,10 @@ layout_mode = 1
 anchors_preset = -1
 anchor_right = 0.15100001
 anchor_bottom = 0.18800001
-offset_left = 1336.0
-offset_top = 47.0
-offset_right = 1458.08
-offset_bottom = 169.95999
+offset_left = 791.0
+offset_top = 786.0
+offset_right = 913.07996
+offset_bottom = 747.95996
 
 [node name="ChallengeLabel" type="Label" parent="UI/VisualizadorAlgoritmo/TerminalPanel"]
 layout_mode = 2
@@ -99,4 +109,3 @@ script = ExtResource("4_pmrx8")
 
 [connection signal="pressed" from="UI/VisualizadorAlgoritmo/Panel/BFS_BUTTON" to="UI/VisualizadorAlgoritmo" method="_on_bfs_button_pressed"]
 [connection signal="pressed" from="UI/VisualizadorAlgoritmo/Panel/DFS_BUTTON" to="UI/VisualizadorAlgoritmo" method="_on_dfs_button_pressed"]
-[connection signal="pressed" from="UI/VisualizadorAlgoritmo/Panel/Close_button" to="UI/VisualizadorAlgoritmo" method="_on_close_button_pressed"]

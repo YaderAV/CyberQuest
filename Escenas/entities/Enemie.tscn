@@ -1,10 +1,10 @@
-[gd_scene load_steps=14 format=3 uid="uid://lidkc3qjral5"]
+[gd_scene load_steps=15 format=3 uid="uid://lidkc3qjral5"]
 
 [ext_resource type="Texture2D" uid="uid://cubfg83as54rf" path="res://Assets/Player/Anim_Robot_Idle1_v1.1_spritesheet.png" id="1_lsh4w"]
-[ext_resource type="Script" uid="uid://csvgk8h678kiy" path="res://Escenas/entities/enemie.gd" id="1_xxx6m"]
+[ext_resource type="Script" uid="uid://cgm6xak6jwvb4" path="res://scripts/Entities/Enemy.gd" id="1_poaor"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xxx6m"]
-size = Vector2(17, 26)
+size = Vector2(14, 24)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_pmiy1"]
 atlas = ExtResource("1_lsh4w")
@@ -77,13 +77,22 @@ animations = [{
 "speed": 30.0
 }]
 
-[node name="Enemie" type="CharacterBody2D"]
-script = ExtResource("1_xxx6m")
+[sub_resource type="CircleShape2D" id="CircleShape2D_xxx6m"]
+
+[node name="Enemy" type="CharacterBody2D"]
+script = ExtResource("1_poaor")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0.5, 3)
+position = Vector2(1, 4)
 shape = SubResource("RectangleShape2D_xxx6m")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_o82qr")
 frame_progress = 0.84351414
+
+[node name="Hitbox" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
+light_mask = 4
+position = Vector2(2, 2)
+shape = SubResource("CircleShape2D_xxx6m")

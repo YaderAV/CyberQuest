@@ -1,0 +1,26 @@
+[gd_resource type="Theme" load_steps=9 format=3 uid="uid://d3bdv8id8jn58"]
+
+[ext_resource type="FontFile" uid="uid://c2wbs1wppv1fp" path="res://UI/Font/Minecraft.ttf" id="1_bsmre"]
+[ext_resource type="Texture2D" uid="uid://bqyiv8f2gp3uj" path="res://UI/Button 1/Button Disable.png" id="1_hlhde"]
+[ext_resource type="Texture2D" uid="uid://bvd5tooq8m6un" path="res://UI/Button 1/Button Hover.png" id="2_5sodv"]
+[ext_resource type="Texture2D" uid="uid://dwmxdx0r018gb" path="res://UI/Card X3/Card X5.png" id="4_6gbjh"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_1yfpq"]
+texture = ExtResource("1_hlhde")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_8poug"]
+texture = ExtResource("2_5sodv")
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_8w5jd"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_tq6xm"]
+texture = ExtResource("4_6gbjh")
+
+[resource]
+Button/styles/disabled = SubResource("StyleBoxTexture_1yfpq")
+Button/styles/hover = SubResource("StyleBoxTexture_8poug")
+Button/styles/pressed = SubResource("StyleBoxTexture_8w5jd")
+Label/colors/font_color = Color(0.9931564, 1, 0.9912242, 1)
+Label/font_sizes/font_size = 30
+Label/fonts/font = ExtResource("1_bsmre")
+Panel/styles/panel = SubResource("StyleBoxTexture_tq6xm")

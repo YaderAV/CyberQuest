@@ -34,10 +34,11 @@ signal solution_submitted(mission_type, player_answer, correct_data)
 @onready var clue_label: Label = $Panel/ClueLabel
 @onready var bfs_button = $Panel/BFS_BUTTON
 @onready var dfs_button = $Panel/DFS_BUTTON
-@onready var close_button = $Panel/Close_button
 @onready var selection_panel:Control = $Panel
 @onready var minimap_container: Control = $MinimapContainer
 
+@onready var map_toggle_btn = $Panel/Map_button
+@onready var term_toggle_btn = $Panel/Terminal_button
 
 var current_challenge_type: String = ""
 var current_correct_data: Dictionary = {}
@@ -113,16 +114,79 @@ func _ready():
 	#conectamos las señales a los botones
 	bfs_button.pressed.connect(Callable(self, "_on_bfs_button_pressed"))
 	dfs_button.pressed.connect(Callable(self, "_on_dfs_button_pressed"))
-	close_button.pressed.connect(Callable(self, "_on_close_button_pressed"))
+	
 	submit_button.pressed.connect(Callable(self,"_on_submit_button_pressed"))
 	update_collected_clues("")
 	
+	if map_toggle_btn: map_toggle_btn.pressed.connect(_on_manual_toggle_map)
+	if term_toggle_btn: term_toggle_btn.pressed.connect(_on_manual_toggle_terminal)
+	
+	# Estado inicial: Todo oculto excepto el "escritorio" (si está activo)
+	hide_all_windows()
+	hide()
 	# Escondemos el UI del visualizador de algoritmos 
 	if is_instance_valid(terminal_panel):
 		terminal_panel.hide()
 	
 	hide()
 
+func hide_all_windows():
+	if is_instance_valid(selection_panel): selection_panel.hide()
+	if is_instance_valid(terminal_panel): terminal_panel.hide()
+	if is_instance_valid(minimap_container): minimap_container.hide()
+
+# Abre solo el menú principal (llamado por la tecla E)
+func show_main_menu():
+	self.show() # Muestra el nodo raíz (el fondo)
+	if is_instance_valid(selection_panel):
+		selection_panel.show()
+		selection_panel.move_to_front() # Asegura que se dibuje encima
+
+func _on_manual_toggle_map():
+	if not is_instance_valid(minimap_container): return
+	
+	minimap_container.visible = !minimap_container.visible
+	
+	if minimap_container.visible:
+		minimap_container.move_to_front()
+		
+		# LÓGICA INTELIGENTE: Si está vacío, pide los datos actuales
+		if minimap_container.get_child_count() == 0:
+			var graph = World.current_graph
+			if graph:
+				print("Visualizador: Regenerando mapa actual...")
+				generate_and_show_graph(graph)
+
+# --- TOGGLE MANUAL DE TERMINAL (Botón en pantalla) ---
+func _on_manual_toggle_terminal():
+	if not is_instance_valid(terminal_panel): return
+	
+	terminal_panel.visible = !terminal_panel.visible
+	
+	if terminal_panel.visible:
+		terminal_panel.move_to_front()
+		
+		# LÓGICA INTELIGENTE: Restaurar el desafío activo si existe
+		# (Necesitamos guardar el último desafío en una variable)
+		if current_challenge_type != "":
+			challenge_label.text = _get_challenge_text(current_challenge_type)
+			# Si ya se resolvió, podríamos mostrar "Misión Completada" o bloquear el input
+
+func _get_challenge_text(currentChallenge:String):
+	var challenge_text = ""
+	match currentChallenge:
+		"BFS", "DFS","Recorrido":
+			challenge_text = "ETAPA: RECORRIDO (Clave de Letras) | INGRESA LA CLAVE"
+		"Dijkstra":
+			challenge_text = "ETAPA: CAMINO MÍNIMO | INGRESA EL NODO DESTINO FINAL"
+		"Prim":
+			challenge_text = "ETAPA: RECONSTRUCCIÓN | INGRESA EL NÚMERO DE ARISTAS DEL MST"
+		"Flow":
+			challenge_text = "ETAPA: FLUJO MÁXIMO | INGRESA EL VALOR DE FLUJO MÁXIMO"
+		_:
+			challenge_text = "Error de misión."
+
+	challenge_label.text = challenge_text
 
 func update_collected_clues(current_clues: String):
 	if is_instance_valid(clue_label):
@@ -131,13 +195,22 @@ func update_collected_clues(current_clues: String):
 		else:
 			clue_label.text = "Claves recolectadas: %s" % current_clues
 # Función específica para la Etapa 1 (Recorrido) del Minijuego 5
-func prompt_algorithm_choice(mission_type: String):
+func prompt_algorithm_choice(mission_type: String, correct_data: Dictionary):
 	# Mostramos los botones de BFS/DFS de nuevo
 	if is_instance_valid(selection_panel):
 		selection_panel.show()
 	
 	challenge_label.text = "ETAPA 1: RECORRIDO | ELIGE el algoritmo para generar la clave."
+	current_correct_data = correct_data
+	current_challenge_type = mission_type
 	
+	var challenge_text = ""
+	
+	match mission_type:
+		"BFS":
+			challenge_text = "MODO BFS: Ingresa la clave del recorrido en Anchura."
+		"DFS":
+			challenge_text = "MODO DFS: Ingresa la clave del recorrido en Profundidad."
 	# Desconectamos los botones de sus misiones del Minijuego 1 (CONNECT_ONE_SHOT ayuda)
 	# y los re-conectamos a la lógica del Minijuego 5.
 	
@@ -152,23 +225,16 @@ func prompt_algorithm_choice(mission_type: String):
 
 # Función llamada desde el GameManager después de la elección BFS/DFS o para otras etapas
 
+func toggle_minimap_window_action():
+	# Reutilizamos la lógica del botón para que se comporten IDÉNTICO
+	_on_manual_toggle_map()
+
 func show_challenge_terminal(challenge_info: String, keep_map_visible: bool = false):
 	print("--- DEBUG (Visualizer): Mostrando Terminal Panel ---")
 	
-	if is_instance_valid(selection_panel):
-		selection_panel.hide()
-		
-	# MODIFICACIÓN AQUÍ:
-	if is_instance_valid(minimap_container):
-		# Solo limpiamos y ocultamos si NO queremos mantenerlo visible
-		if not keep_map_visible:
-			for child in minimap_container.get_children():
-				child.queue_free()
-			minimap_container.hide()
-		# Si keep_map_visible es true, el mapa se queda ahí.
-	
 	if is_instance_valid(terminal_panel):
 		terminal_panel.show()
+		terminal_panel.move_to_front()
 	else:
 		push_warning("Visualizador: TerminalPanel es nulo.")
 		return
@@ -212,6 +278,8 @@ func hide_all_panels():
 	
 	# Oculta el nodo raíz
 	self.hide()
+
+
 func _on_bfs_button_pressed():
 	print("DEBUG: BOTNO BFS PRESIONADO")
 	# Pedir al GameManager que inicie la misión BFS
@@ -288,19 +356,22 @@ func _apply_step(step: Dictionary) -> void:
 # --- Implementación de Animaciones ---
 
 func generate_and_show_graph(graph: Graph, edges_to_highlight: Array = []) -> void:
-	# Oculta el menú de selección si aún está visible
+	# 1. Muestra el nodo raíz
+	self.show()
+	
+	# 2. ¡PRIORIDAD VISUAL!
+	# Oculta el menú de botones OBLIGATORIAMENTE
 	if is_instance_valid(selection_panel):
 		selection_panel.hide()
-	# Oculta la terminal (Minijuego 5)
-	if is_instance_valid(terminal_panel):
-		terminal_panel.hide()
-	# Muestra el contenedor del minimapa
-	minimap_container.show()
-	self.show()
+		
+	# Muestra el mapa y TRAERLO AL FRENTE (Encima de todo)
+	if is_instance_valid(minimap_container):
+		minimap_container.show()
+		minimap_container.move_to_front() # <--- ESTO ES CRUCIAL
 	
 	print("Visualizador: Generando grafo dinámicamente.")
 	
-	# 1. Limpiar dibujos anteriores
+	# 2. Limpieza (resto de tu código igual...)
 	for child in minimap_container.get_children():
 		child.queue_free()
 	
@@ -309,7 +380,6 @@ func generate_and_show_graph(graph: Graph, edges_to_highlight: Array = []) -> vo
 		push_warning("MinimapContainer tiene tamaño 0. No se puede dibujar.")
 		return # Evita errores si el contenedor no está listo aún
 	
-	# 2. Generar Nodos
 	# 2. Generar Nodos
 	var node_visuals = {}
 	for node_id in graph.nodes():
@@ -333,7 +403,9 @@ func generate_and_show_graph(graph: Graph, edges_to_highlight: Array = []) -> vo
 		
 		# (Si usabas la lógica anterior de buscar "Label" manualmente, bórrala,
 		#  es mejor usar la función del paso 1).
-
+	
+	update_nodes_visual_state(World.current_node_id, World.unlocked_nodes)
+	
 	# 3. Generar Aristas (Portales)
 	var processed_edges = {} # Evitar dibujar la arista doblemente (a->b y b->a)
 	for u in graph.nodes():
@@ -385,15 +457,26 @@ func generate_and_show_graph(graph: Graph, edges_to_highlight: Array = []) -> vo
 			
 			minimap_container.add_child(edge_visual_root)
 			
-			minimap_container.add_child(edge_visual_root)
-			
 			
 
-	# 4. Implementar la animación (Esto se hace en el paso de visualización)
-	# Por ahora, aseguramos que _get_node_visual y _get_edge_visual funcionen.
+func update_nodes_visual_state(current_player_node: String, unlocked_dict: Dictionary):
+	# Accedemos al grafo actual desde el GameManager
+	var graph = World	.current_graph
+	if not graph: return
 	
-	# 5. [Opcional] Mostrar el panel de control
-	# show_challenge_terminal(...)
+	for node_id in graph.nodes():
+		# Buscar el nodo visual ya creado
+		var node_visual = _get_node_visual(node_id)
+		if is_instance_valid(node_visual):
+			
+			# Obtener datos
+			var letter = graph.get_node_letter(node_id)
+			var is_unlocked = unlocked_dict.get(node_id, false) # ¿Matamos al enemigo?
+			var is_current = (node_id == current_player_node)   # ¿Estamos aquí?
+			
+			# Actualizar la visual
+			if node_visual.has_method("update_visual"):
+				node_visual.update_visual(node_id, letter, is_unlocked, is_current)
 
 func _highlight_node(node_id):
 	"""(visit, extract_min) - Un destello 'caliente' como la lava."""
